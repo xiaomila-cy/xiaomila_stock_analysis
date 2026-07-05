@@ -1,29 +1,43 @@
 #!/usr/bin/env python3
-"""提取十大股东 + 基金持仓 — 东方财富 F10 浏览器提取"""
-import sys
-
-JS_CODE = """
-(function() {
-  var rows = document.querySelectorAll('.shareholder-table tr, .gd_table tr');
-  var result = [];
-  rows.forEach(function(row) {
-    var cells = row.querySelectorAll('td, th');
-    if (cells.length >= 3) {
-      result.push({
-        name: cells[0].textContent.trim(),
-        shares: cells[1].textContent.trim(),
-        ratio: cells[2].textContent.trim(),
-        change: cells.length > 3 ? cells[3].textContent.trim() : ''
-      });
-    }
-  });
-  return JSON.stringify(result);
-})()
+"""
+fetch_holders.py — 股东/基金持仓数据提取指令
+用法: python3 fetch_holders.py 600519
+输出: 浏览提取指令，按指令用browser工具获取数据
 """
 
-if __name__ == "__main__":
-    code = sys.argv[1] if len(sys.argv) > 1 else "002460"
-    url = f"https://emweb.securities.eastmoney.com/pc_hsf10/pages/index.html?type=web&code={code}&color=r#/sdgd"
-    print(f"1. browser_navigate('{url}')")
-    print(f"2. 等待页面加载，执行提取脚本")
-    print(f"\n提取脚本:\n{JS_CODE}")
+import sys, json
+
+def generate(code: str) -> dict:
+    market = 'sh' if code.startswith(('6','9')) else 'sz'
+    return {
+        'success': True,
+        'script': 'fetch_holders',
+        'code': code,
+        'type': 'browser_extraction',
+        'steps': [
+            {
+                'what': '十大股东',
+                'url': f'https://emweb.securities.eastmoney.com/pc_hsf10/pages/index.html?type=web&code={market}{code}&color=r#/sdgd',
+                'js': "JSON.stringify(Array.from(document.querySelectorAll('table tr')).slice(0,12).map(r=>Array.from(r.querySelectorAll('td,th')).map(c=>c.textContent?.trim())))",
+                '降级': f'browser_navigate后执行browser_snapshot(full=true)，手动提取前十大股东表格'
+            },
+            {
+                'what': '基金持仓',
+                'url': f'https://emweb.securities.eastmoney.com/pc_hsf10/pages/index.html?type=web&code={market}{code}&color=r#/jjcg',
+                'js': "JSON.stringify(Array.from(document.querySelectorAll('table tr')).slice(0,15).map(r=>Array.from(r.querySelectorAll('td,th')).map(c=>c.textContent?.trim())))",
+                '降级': f'同样用browser_snapshot提取基金持仓变化趋势'
+            },
+        ]
+    }
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(json.dumps({'success': False, 'error': 'Usage: fetch_holders.py CODE'}, ensure_ascii=False))
+        sys.exit(1)
+
+    print(json.dumps(generate(sys.argv[1]), ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    main()
