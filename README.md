@@ -1,6 +1,9 @@
 # 金叉 · A股分析框架
 
 > 一个面向 AI Agent 的 A 股投资分析 Skill
+>
+> <img width="879" height="1155" alt="image" src="https://github.com/user-attachments/assets/7e79ef07-97e4-4b02-aa8c-7eda5480b3a8" />
+
 
 ## 这是什么
 
@@ -23,6 +26,8 @@
 
 ```bash
 hermes skills install git地址
+
+
 ### 其他 Agent
 
 将 `SKILL.md` 内容粘贴到你的 Agent 的系统提示词或 Skills 目录中。
