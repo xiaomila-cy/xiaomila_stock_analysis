@@ -22,9 +22,7 @@
 ### Hermes Agent
 
 ```bash
-hermes skills install https://github.com/wcy19930921/golden-cross-skill/blob/main/SKILL.md
-```
-
+hermes skills install git地址
 ### 其他 Agent
 
 将 `SKILL.md` 内容粘贴到你的 Agent 的系统提示词或 Skills 目录中。
